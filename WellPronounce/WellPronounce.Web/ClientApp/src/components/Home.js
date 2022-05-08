@@ -11,7 +11,7 @@ export class Home extends Component {
         super(props);
 
         this.state = {
-            value: '',
+            value: "",
             copied: false,
             status: 1,
             standardTextInput: ""
@@ -25,22 +25,17 @@ export class Home extends Component {
         this.setState({ standardTextInput: event.target.value });
     }
 
-    //state = {
-    //    value: '',
-    //    copied: false
-    //};
 
     radioHandler = (status) => {
         this.setState({ status });
     };
 
     convertOnClick = () => {
-        //console.log(standardTextInput);
-        //console.log(standardTextInput.value);
+
         var payload = {
             text: this.state.standardTextInput,
             language: "English",
-            type: "Standard"
+            processType: "Standard"
         };
 
         const requestOptions = {
@@ -48,9 +43,14 @@ export class Home extends Component {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         };
-        fetch('/api/TextToSpeech', requestOptions)
-            .then(response => console.log(response))
-            .then(data => console.log(data));
+
+        const response = fetch('/api/TextToSpeech/StandardProcess', requestOptions).then(r => r.json()).then(res => {
+            if (res) {               
+                this.setState({
+                    value: res.path
+                });
+            }
+        });
 
     }
 

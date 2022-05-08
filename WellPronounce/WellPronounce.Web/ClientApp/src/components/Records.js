@@ -5,14 +5,14 @@ export class Records extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { forecasts: [], loading: true };
+        this.state = { records: [], loading: true };
     }
 
     componentDidMount() {
-        this.populateWeatherData();
+        this.populateData();
     }
 
-    static renderForecastsTable(forecasts) {
+    static renderRecordsTable(forecasts) {
         return (
             <table className='table table-striped' aria-labelledby="tabelLabel">
                 <thead>
@@ -26,12 +26,12 @@ export class Records extends Component {
                 </thead>
                 <tbody>
                     {forecasts.map(forecast =>
-                        <tr key={forecast.date}>
-                            <td>{forecast.date}</td>
-                            <td>{forecast.temperatureC}</td>
-                            <td>{forecast.temperatureF}</td>
-                            <td>{forecast.summary}</td>
-                            <td>{forecast.summary}</td>
+                        <tr key={forecast.id}>
+                            <td>{forecast.uniqueId}</td>
+                            <td>{forecast.inputText}</td>
+                            <td>{forecast.language}</td>
+                            <td>{forecast.processType}</td>
+                            <td>{forecast.blobPath}</td>  
                         </tr>
                     )}
                 </tbody>
@@ -42,20 +42,19 @@ export class Records extends Component {
     render() {
         let contents = this.state.loading
             ? <p><em>Loading...</em></p>
-            : Records.renderForecastsTable(this.state.forecasts);
+            : Records.renderRecordsTable(this.state.records);
 
         return (
             <div>
-                <h1 id="tabelLabel" >Weather forecast</h1>
-                <p>This component demonstrates fetching data from the server.</p>
+                <h1 id="tabelLabel" >Records</h1>
                 {contents}
             </div>
         );
     }
 
-    async populateWeatherData() {
-        const response = await fetch('weatherforecast');
+    async populateData() {
+        const response = await fetch('/api/TextToSpeech/Records');
         const data = await response.json();
-        this.setState({ forecasts: data, loading: false });
+        this.setState({ records: data, loading: false });
     }
 }

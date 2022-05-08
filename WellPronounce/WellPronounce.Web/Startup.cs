@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WellPronounce.Web.DBContext;
 using WellPronounce.Web.Interfaces;
 using WellPronounce.Web.Repositories;
 using WellPronounce.Web.Services;
@@ -25,7 +27,7 @@ namespace WellPronounce.Web
         {
 
             services.AddControllersWithViews();
-
+            services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ApplicationConn")));
             services.AddScoped<ITextToSpeechRepository, TextToSpeechRepository>();
             services.AddScoped<IBlobStorageService, BlobStorageService>();
             services.AddScoped<ITextToSpeechService, TextToSpeechService>();

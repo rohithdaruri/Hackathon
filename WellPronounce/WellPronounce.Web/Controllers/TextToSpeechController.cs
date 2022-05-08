@@ -20,11 +20,36 @@ namespace WellPronounce.Web.Controllers
             _textToSpeechService = textToSpeechService;
         }
 
-        [HttpPost]
-        public IActionResult Convert(TextRequestModel textRequestModel)
+        [HttpPost("StandardProcess")]
+        public async Task<IActionResult> StandardProcess(TextRequestModel textRequestModel)
         {
-            var filePath = _textToSpeechService.CallCognitiveService(textRequestModel);
-            return Ok(filePath);
+            try
+            {
+                var response = await _textToSpeechService.StandardProcessSaveTextToSpeechData(textRequestModel);               
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
         }
+
+        [HttpGet("Records")]
+        public async Task<IActionResult> GetRecords()
+        {
+            try
+            {
+                var records = await _textToSpeechService.GetRecords();
+                return Ok(records);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+        }
+
     }
 }

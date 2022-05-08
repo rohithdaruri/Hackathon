@@ -14,17 +14,22 @@ export class Home extends Component {
             value: "",
             copied: false,
             status: 1,
-            standardTextInput: ""
+            standardTextInput: "",
+            customTextInput:""
         };
 
-        this.handleChange = this.handleChange.bind(this);
+        this.handleStandardChange = this.handleStandardChange.bind(this);
+        this.handleCustomChange = this.handleCustomChange.bind(this);
     }
 
 
-    handleChange(event) {
+    handleStandardChange(event) {
         this.setState({ standardTextInput: event.target.value });
     }
 
+    handleCustomChange(event) {
+        this.setState({ customTextInput: event.target.value });
+    }
 
     radioHandler = (status) => {
         this.setState({ status });
@@ -45,7 +50,35 @@ export class Home extends Component {
         };
 
         const response = fetch('/api/TextToSpeech/StandardProcess', requestOptions).then(r => r.json()).then(res => {
-            if (res) {               
+            if (res) {
+                this.setState({
+                    value: res.path
+                });
+            }
+        });
+
+    }
+
+    customProcess = (blob) => {
+        console.log(blob);
+
+        var payload = {
+            text: this.state.customTextInput,
+            language: "English",
+            processType: "Custom",
+            audioFile : blob
+        };
+
+       
+
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        };
+
+        const response = fetch('/api/TextToSpeech/CustomProcess', requestOptions).then(r => r.json()).then(res => {
+            if (res) {
                 this.setState({
                     value: res.path
                 });
@@ -96,18 +129,18 @@ export class Home extends Component {
                                 <b>Text</b>
                             </div>
                             <div className="col-sm-3" style={myDivstyle}>
-                                <textarea type="text" className="form-control" value={this.state.standardTextInput} onChange={this.handleChange} id="standardTextInput" />
+                                <textarea type="text" className="form-control" value={this.state.standardTextInput} onChange={this.handleStandardChange} id="standardTextInput" />
                             </div>
                             <div className="col-sm-3" style={myDivstyle}>
                                 <input type="text" className="form-control" id="standardLanguageInput" disabled value="English" />
                             </div>
                             <div className="col-sm-3" style={myDivstyle}>
-                                <button className="btn btn-dark" onClick={this.convertOnClick}>Convert</button>
+                                <button className="btn btn-dark" onClick={this.convertOnClick}>Play</button>
                             </div>
                             <div className="col-sm-2" style={myDivstyle}>
-                                <Player
-                                    url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-                                />
+                                {/*<Player*/}
+                                {/*    url={this.state.value}*/}
+                                {/*/>*/}
                             </div>
                         </div>
                         <br />
@@ -116,7 +149,7 @@ export class Home extends Component {
                         <div className="row">
                             <div className="col-sm-1" style={myDivstyle}><b>Link</b></div>
                             <div className="col-sm-9" style={myDivstyle}>
-                                <input type="text" className="form-control" id="dataOutput" value={this.state.value}
+                                <input type="text" className="form-control" id="standardDataOutput" value={this.state.value}
                                     onChange={({ target: { value } }) => this.setState({ value, copied: false })} disabled />
                             </div>
                             <div className="col-sm-2" style={myDivstyle}>
@@ -140,12 +173,12 @@ export class Home extends Component {
                                 <b>Text</b>
                             </div>
                             <div className="col-sm-3" style={myDivstyle}>
-                                <textarea type="text" className="form-control" id="customTextInput" />
+                            <textarea type="text" className="form-control" value={this.state.customTextInput} onChange={this.handleCustomChange} id="customTextInput" />
                             </div>
                             <div className="col-sm-3" style={myDivstyle}>
                                 <input type="text" className="form-control" id="customLanguageInput" disabled value="English" />
                             </div>
-                        <div className="col-sm-5" style={myDivstyle}>
+                            <div className="col-sm-5" style={myDivstyle}>
                                 <Recorder
                                     containerClassName="my-recorder-container"
                                     Stop={<div>Stop</div>}
@@ -154,14 +187,27 @@ export class Home extends Component {
                                     Record={<div>Record</div>}
                                     Send={<div>Upload</div>}
                                     onSend={(blobUrl, blob) => {
-                                        alert("check console!");
-                                        console.log("blob : ", blob);
-                                        console.log("blobUrl : ", blobUrl);
+                                        this.customProcess(blob);
                                     }}
                                 />
                             </div>
                         </div>
 
+                        <div className="row">
+                            <div className="col-sm-1" style={myDivstyle}><b>Output</b></div>
+                            <div className="col-sm-9" style={myDivstyle}>
+                                <textarea type="text" className="form-control" id="customDataOutput" value={this.state.value}
+                                    onChange={({ target: { value } }) => this.setState({ value, copied: false })} disabled />
+                            </div>
+                            <div className="col-sm-2" style={myDivstyle}>
+                                <CopyToClipboard text={this.state.value}
+                                    onCopy={() => this.setState({ copied: true })}>
+                                    <button className="btn btn-success"><i className="fas fa-copy"></i></button>
+                                </CopyToClipboard>
+
+                                {this.state.copied ? <span style={{ color: 'red' }}> Copied.</span> : null}
+                            </div>
+                        </div>
                     </div>
                 }
             </div>

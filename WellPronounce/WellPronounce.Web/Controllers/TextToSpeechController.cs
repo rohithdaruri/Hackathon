@@ -21,11 +21,11 @@ namespace WellPronounce.Web.Controllers
         }
 
         [HttpPost("StandardProcess")]
-        public async Task<IActionResult> StandardProcess(TextRequestModel textRequestModel)
+        public async Task<IActionResult> StandardProcess(StandardTextRequestModel standardTextRequestModel)
         {
             try
             {
-                var response = await _textToSpeechService.StandardProcessSaveTextToSpeechData(textRequestModel);               
+                var response = await _textToSpeechService.StandardProcessSaveTextToSpeechData(standardTextRequestModel);               
                 return Ok(response);
             }
             catch (Exception ex)
@@ -46,6 +46,21 @@ namespace WellPronounce.Web.Controllers
             catch (Exception ex)
             {
 
+                throw;
+            }
+
+        }
+
+        [HttpPost("CustomProcess")]
+        public async Task<IActionResult> CustomProcess([FromBody] CustomTextRequestModel customTextRequestModel)
+        {
+            try
+            {
+                
+                return Ok();
+            }
+            catch (Exception ex)
+            {
                 throw;
             }
 

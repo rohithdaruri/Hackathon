@@ -22,7 +22,7 @@ namespace WellPronounce.Web.Services
             _textToSpeechRepository = textToSpeechRepository;
         }
 
-        private async Task<byte[]> CallCognitiveService(TextRequestModel textRequestModel)
+        private async Task<byte[]> CallCognitiveService(StandardTextRequestModel standardTextRequestModel)
         {
             var speechConfig = SpeechConfig.FromSubscription(YourSubscriptionKey, YourServiceRegion);
             // The language of the voice that speaks.
@@ -31,15 +31,15 @@ namespace WellPronounce.Web.Services
 
             using (var speechSynthesizer = new SpeechSynthesizer(speechConfig))
             {
-                string text = textRequestModel.Text;
+                string text = standardTextRequestModel.Text;
                 var speechSynthesisResult = await speechSynthesizer.SpeakTextAsync(text);
-                blob = OutputSpeechSynthesisResult(speechSynthesisResult, textRequestModel);
+                blob = OutputSpeechSynthesisResult(speechSynthesisResult, standardTextRequestModel);
             }
 
             return blob;
         }
 
-        private byte[] OutputSpeechSynthesisResult(SpeechSynthesisResult speechSynthesisResult, TextRequestModel textRequestModel)
+        private byte[] OutputSpeechSynthesisResult(SpeechSynthesisResult speechSynthesisResult, StandardTextRequestModel standardTextRequestModel)
         {
             switch (speechSynthesisResult.Reason)
             {
@@ -58,15 +58,15 @@ namespace WellPronounce.Web.Services
             }
         }
 
-        public async Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(TextRequestModel textRequestModel)
+        public async Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(StandardTextRequestModel standardTextRequestModel)
         {
             try
             {
                 var blobPath = "Sample";
                 StandardOutputModel response;
-                var blob = await CallCognitiveService(textRequestModel);
-                blobPath = await _blobStorageService.UploadFileToBlob(textRequestModel.Text, blob, "");
-                response = await _textToSpeechRepository.StandardProcessSaveTextToSpeechData(blobPath, textRequestModel);
+                var blob = await CallCognitiveService(standardTextRequestModel);
+                //blobPath = await _blobStorageService.UploadFileToBlob(standardTextRequestModel.Text, blob, "");
+                response = await _textToSpeechRepository.StandardProcessSaveTextToSpeechData(blobPath, standardTextRequestModel);
                 return response;
             }
             catch (Exception ex)

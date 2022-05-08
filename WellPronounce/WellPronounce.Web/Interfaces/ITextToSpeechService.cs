@@ -9,7 +9,7 @@ namespace WellPronounce.Web.Interfaces
 {
     public interface ITextToSpeechService
     {
-        Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(TextRequestModel textRequestModel);
+        Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(StandardTextRequestModel standardTextRequestModel);
         Task<List<SpeechDetail>> GetRecords();
     }
 }

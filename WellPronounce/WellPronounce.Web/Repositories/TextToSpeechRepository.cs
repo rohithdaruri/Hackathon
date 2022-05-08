@@ -24,17 +24,17 @@ namespace WellPronounce.Web.Repositories
             return await _dbContext.SpeechDetails.OrderByDescending(x=>x.Created).ToListAsync();
         }
 
-        public async Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(string blobPath , TextRequestModel textRequestModel)
+        public async Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(string blobPath , StandardTextRequestModel standardTextRequestModel)
         {
-            var existingData = _dbContext.SpeechDetails.Where(x => x.InputText.Equals(textRequestModel.Text)).FirstOrDefault();
+            var existingData = _dbContext.SpeechDetails.Where(x => x.InputText.Equals(standardTextRequestModel.Text)).FirstOrDefault();
             if (existingData == null)
             {
                 var record = new SpeechDetail
                 {
                     UniqueId = Guid.NewGuid(),
-                    InputText = textRequestModel.Text,
-                    Language = textRequestModel.Language,
-                    ProcessType = textRequestModel.ProcessType,
+                    InputText = standardTextRequestModel.Text,
+                    Language = standardTextRequestModel.Language,
+                    ProcessType = standardTextRequestModel.ProcessType,
                     BlobPath = blobPath,
                     Created = DateTime.UtcNow
                 };

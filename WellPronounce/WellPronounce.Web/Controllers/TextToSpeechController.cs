@@ -25,7 +25,7 @@ namespace WellPronounce.Web.Controllers
         {
             try
             {
-                var response = await _textToSpeechService.StandardProcessSaveTextToSpeechData(standardTextRequestModel);               
+                var response = await _textToSpeechService.StandardProcessSaveTextToSpeechData(standardTextRequestModel);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -56,7 +56,7 @@ namespace WellPronounce.Web.Controllers
         {
             try
             {
-                
+                byte[] byteContent = customTextRequestModel.AudioFile;
                 return Ok();
             }
             catch (Exception ex)

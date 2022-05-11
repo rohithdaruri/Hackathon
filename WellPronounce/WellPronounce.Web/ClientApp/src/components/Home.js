@@ -6,7 +6,6 @@ const Recorder = createRecorder(React);
 
 export class Home extends Component {
     static displayName = Home.name;
-
     constructor(props) {
         super(props);
 
@@ -15,7 +14,7 @@ export class Home extends Component {
             copied: false,
             status: 1,
             standardTextInput: "",
-            customTextInput:""
+            customTextInput: ""
         };
 
         this.handleStandardChange = this.handleStandardChange.bind(this);
@@ -25,6 +24,7 @@ export class Home extends Component {
 
     handleStandardChange(event) {
         this.setState({ standardTextInput: event.target.value });
+   
     }
 
     handleCustomChange(event) {
@@ -33,10 +33,13 @@ export class Home extends Component {
 
     radioHandler = (status) => {
         this.setState({ status });
+        this.setState({ value: "" });
+        this.setState({ standardTextInput: "" });
+        this.setState({ customTextInput: "" });
     };
 
     convertOnClick = () => {
-
+        document.getElementById('modal-root').style.filter = 'blur(5px)'
         var payload = {
             text: this.state.standardTextInput,
             language: "English",
@@ -54,6 +57,7 @@ export class Home extends Component {
                 this.setState({
                     value: res.path
                 });
+                document.getElementById('modal-root').style.filter = 'blur(0px)'
             }
         });
 
@@ -65,7 +69,7 @@ export class Home extends Component {
         var payload = {
             text: this.state.customTextInput,
             language: "English",
-            processType: "Custom",
+            processType: "NonStandard",
             audioFile : blob
         };
 
@@ -85,6 +89,20 @@ export class Home extends Component {
             }
         });
 
+
+        //let data = new FormData();
+
+        //data.append('text', this.state.customTextInput);
+        //data.append('language', "English");
+        //data.append('processType', "Custom");
+        //data.append('audioFile', blob, "audioFile.wav");
+
+        //const config = {
+        //    headers: { 'content-type': 'multipart/form-data' }
+        //}
+        //axios.post('/api/TextToSpeech/CustomProcess', data, config);
+
+
     }
 
     render() {
@@ -95,8 +113,7 @@ export class Home extends Component {
         };
 
         return (
-            <div className="container">
-
+            <div id="modal-root" className="container">
                 {/*Standard or Custom Type Selection*/}
                 <div className="row">
                     <div className="col-sm-5">
@@ -112,7 +129,7 @@ export class Home extends Component {
                         </div>
                         <div className="form-check-inline">
                             <label className="form-check-label" for="customradio">
-                                <input type="radio" className="form-check-input" id="customradio" name="optradio" value="Custom" checked={status === 2} onClick={(e) => this.radioHandler(2)} /><b>Custom</b>
+                                <input type="radio" className="form-check-input" id="customradio" name="optradio" value="NonStandard" checked={status === 2} onClick={(e) => this.radioHandler(2)} /><b>NonStandard</b>
                             </label>
                         </div>
                     </div>
@@ -135,7 +152,7 @@ export class Home extends Component {
                                 <input type="text" className="form-control" id="standardLanguageInput" disabled value="English" />
                             </div>
                             <div className="col-sm-3" style={myDivstyle}>
-                                <button className="btn btn-dark" onClick={this.convertOnClick}>Play</button>
+                                <button className="btn btn-dark" id="standardPlay" onClick={this.convertOnClick}>Play</button>
                             </div>
                             <div className="col-sm-2" style={myDivstyle}>
                                 {/*<Player*/}

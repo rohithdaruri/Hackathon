@@ -62,12 +62,27 @@ namespace WellPronounce.Web.Services
         {
             try
             {
-                var blobPath = "Sample";
-                StandardOutputModel response;
-                var blob = await CallCognitiveService(standardTextRequestModel);
-                //blobPath = await _blobStorageService.UploadFileToBlob(standardTextRequestModel.Text, blob, "");
-                response = await _textToSpeechRepository.StandardProcessSaveTextToSpeechData(blobPath, standardTextRequestModel);
-                return response;
+                if (standardTextRequestModel.Text != "")
+                {
+                    var blobPath = string.Empty;
+                    StandardOutputModel response;
+                    var blob = await CallCognitiveService(standardTextRequestModel);
+                    var existing = await _textToSpeechRepository.GetDetailByName(standardTextRequestModel);
+                    if (existing == null)
+                    {
+                        blobPath = await _blobStorageService.UploadFileToBlob(standardTextRequestModel.Text, blob, "");
+                        response = await _textToSpeechRepository.StandardProcessSaveTextToSpeechData(blobPath, standardTextRequestModel);
+                        return response;
+                    }
+                    else
+                    {
+                        return existing;
+                    }
+                }
+                else
+                {
+                    return new StandardOutputModel();
+                }            
             }
             catch (Exception ex)
             {

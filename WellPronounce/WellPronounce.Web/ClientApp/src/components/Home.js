@@ -134,9 +134,7 @@ export class Home extends Component {
             //audioFile: blob
         };
 
-        var blob = new Blob([arrayBuffer], { type: type });
-        var url = URL.createObjectURL(blob);
-
+        
         const requestOptions = {
             method: 'POST',
             headers: { 'content-type': 'application/json' },

@@ -14,28 +14,36 @@ export class Records extends Component {
 
     static renderRecordsTable(forecasts) {
         return (
-            <table className='table table-striped' aria-labelledby="tabelLabel">
-                <thead>
-                    <tr>
-                        <th>UniqueId</th>
-                        <th>InputText</th>
-                        <th>Language</th>
-                        <th>Type</th>
-                        <th>BlobPath</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {forecasts.map(forecast =>
-                        <tr key={forecast.id}>
-                            <td>{forecast.uniqueId}</td>
-                            <td>{forecast.inputText}</td>
-                            <td>{forecast.language}</td>
-                            <td>{forecast.processType}</td>
-                            <td>{forecast.blobPath}</td>  
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                <div class="table-responsive-sm">
+                    <table className='table table-bordered table-sm' aria-labelledby="tabelLabel">
+                        <thead>
+                            <tr>
+                                <th>Unique Id</th>
+                                <th>Legal FirstName</th>
+                                <th>Legal LastName</th>
+                                <th>Prefered Name</th>
+                                <th>Language</th>
+                                <th>Phonetics</th>
+                                <th>Type</th>
+                                <th>Blob Path</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {forecasts.map(forecast =>
+                                <tr key={forecast.id}>
+                                    <td>{forecast.uniqueId}</td>
+                                    <td>{forecast.legalFirstName}</td>
+                                    <td>{forecast.legalLastName}</td>
+                                    <td>{forecast.preferedName}</td>
+                                    <td>{forecast.language}</td>
+                                    <td>{forecast.phonetics}</td>
+                                    <td>{forecast.processType}</td>
+                                    <td>{forecast.blobPath}</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
         );
     }
 

@@ -26,15 +26,15 @@ namespace WellPronounce.Web.Repositories
 
         public async Task<StandardOutputModel> GetDetailByName(StandardTextRequestModel standardTextRequestModel)
         {
-
-            var existing = await _dbContext.SpeechDetails.Where(x => x.InputText.Equals(standardTextRequestModel.Text)).FirstOrDefaultAsync();
+            var existing = await _dbContext.SpeechDetails.Where(x => x.PreferedName.Equals(standardTextRequestModel.PreferedName) && x.LegalFirstName.Equals(standardTextRequestModel.LegalFirstName) && x.LegalLastName.Equals(standardTextRequestModel.LegalLastName)).FirstOrDefaultAsync();
 
             if (existing != null)
             {
                 var response = new StandardOutputModel
                 {
                     Path = existing.BlobPath,
-                    UniqueId = existing.UniqueId.ToString()
+                    UniqueId = existing.UniqueId.ToString(),
+                    Phonetics = existing.Phonetics
                 };
 
                 return response;
@@ -45,15 +45,18 @@ namespace WellPronounce.Web.Repositories
             }          
         }
 
-        public async Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(string blobPath , StandardTextRequestModel standardTextRequestModel)
+        public async Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(string blobPath , StandardTextRequestModel standardTextRequestModel, string phonetics)
         {
-            var existingData = _dbContext.SpeechDetails.Where(x => x.InputText.Equals(standardTextRequestModel.Text)).FirstOrDefault();
+            var existingData = await _dbContext.SpeechDetails.Where(x => x.PreferedName.Equals(standardTextRequestModel.PreferedName) && x.LegalFirstName.Equals(standardTextRequestModel.LegalFirstName) && x.LegalLastName.Equals(standardTextRequestModel.LegalLastName)).FirstOrDefaultAsync();
             if (existingData == null)
             {
                 var record = new SpeechDetail
                 {
                     UniqueId = Guid.NewGuid(),
-                    InputText = standardTextRequestModel.Text,
+                    LegalFirstName = standardTextRequestModel.LegalFirstName,
+                    LegalLastName = standardTextRequestModel.LegalLastName,
+                    PreferedName = standardTextRequestModel.PreferedName,
+                    Phonetics = phonetics,
                     Language = standardTextRequestModel.Language,
                     ProcessType = standardTextRequestModel.ProcessType,
                     BlobPath = blobPath,
@@ -66,7 +69,8 @@ namespace WellPronounce.Web.Repositories
                 var response = new StandardOutputModel
                 {
                     Path = record.BlobPath,
-                    UniqueId = record.UniqueId.ToString()
+                    UniqueId = record.UniqueId.ToString(),
+                    Phonetics = record.Phonetics
                 };
 
                 return response;
@@ -76,7 +80,8 @@ namespace WellPronounce.Web.Repositories
                 var response = new StandardOutputModel
                 {
                     Path = existingData.BlobPath,
-                    UniqueId = existingData.UniqueId.ToString()
+                    UniqueId = existingData.UniqueId.ToString(),
+                    Phonetics = existingData.Phonetics
                 };
 
                 return response;

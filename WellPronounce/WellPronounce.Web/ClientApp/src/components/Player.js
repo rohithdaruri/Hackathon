@@ -4,7 +4,13 @@ const useAudio = url => {
     var [audio] = useState(new Audio(url));
     const [playing, setPlaying] = useState(false);
 
-    const toggle = () => setPlaying(!playing);
+    const toggle = () => {
+        if (url == "") {
+            alert("No Audio present");
+            return;
+        }
+        setPlaying(!playing);
+    }
     //console.log(url);
     useEffect(() => {
         audio = new Audio(url);
@@ -20,7 +26,7 @@ const useAudio = url => {
             audio.removeEventListener('ended', () => setPlaying(false));
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [playing]);
 
     return [playing, toggle];
 };
@@ -30,7 +36,7 @@ const Player = ({ url }) => {
     //console.log(url);
     return (
         <div>
-            <button className="btn btn-primary" onClick={toggle}>{playing ? <i className="fas fa-pause"></i> : <i className="fas fa-play"></i>}</button>
+            <button className="btn btn-primary" onClick={toggle}>{playing ? <i className="fas fa-pause"> Pause</i> : <i className="fas fa-play"> Play</i>}</button>
         </div>
     );
 };

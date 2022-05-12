@@ -2,6 +2,7 @@ import React, { Component, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Player from "./Player";
 import createRecorder from "react-simple-recorder";
+import axios from 'axios';
 const Recorder = createRecorder(React);
 
 export class Home extends Component {
@@ -11,37 +12,88 @@ export class Home extends Component {
 
         this.state = {
             value: "",
+            phoneticValue: "",
             copied: false,
             status: 1,
-            standardTextInput: "",
-            customTextInput: ""
+            standardLFNTextInput: "",
+            standardLLNTextInput: "",
+            standardPNTextInput: "",
+            customLFNTextInput: "",
+            customLLNTextInput: "",
+            customPNTextInput: "",
         };
 
-        this.handleStandardChange = this.handleStandardChange.bind(this);
-        this.handleCustomChange = this.handleCustomChange.bind(this);
+        this.handleStandardLFNChange = this.handleStandardLFNChange.bind(this);
+        this.handleStandardLLNChange = this.handleStandardLLNChange.bind(this);
+        this.handleStandardPNChange = this.handleStandardPNChange.bind(this);
+
+        this.handleCustomLFNChange = this.handleCustomLFNChange.bind(this);
+        this.handleCustomLLNChange = this.handleCustomLLNChange.bind(this);
+        this.handleCustomPNChange = this.handleCustomPNChange.bind(this);
+
     }
 
 
-    handleStandardChange(event) {
-        this.setState({ standardTextInput: event.target.value });
-   
+    handleStandardLFNChange(event) {
+        this.setState({
+            standardLFNTextInput: event.target.value
+        });
     }
 
-    handleCustomChange(event) {
-        this.setState({ customTextInput: event.target.value });
+    handleStandardLLNChange(event) {
+        this.setState({
+            standardLLNTextInput: event.target.value
+        });
+    }
+
+    handleStandardPNChange(event) {
+        this.setState({
+            standardPNTextInput: event.target.value
+        });
+    }
+
+    handleCustomLFNChange(event) {
+        this.setState({
+            customLFNTextInput: event.target.value
+        });
+    }
+
+    handleCustomLLNChange(event) {
+        this.setState({
+            customLLNTextInput: event.target.value
+        });
+    }
+
+    handleCustomPNChange(event) {
+        this.setState({
+            customPNTextInput: event.target.value
+        });
     }
 
     radioHandler = (status) => {
         this.setState({ status });
         this.setState({ value: "" });
-        this.setState({ standardTextInput: "" });
-        this.setState({ customTextInput: "" });
+        this.setState({ phoneticValue: "" });
+        this.setState({ standardLFNTextInput: "" });
+        this.setState({ standardLLNTextInput: "" });
+        this.setState({ standardPNTextInput: "" });
+        this.setState({ customLFNTextInput: "" });
+        this.setState({ customLLNTextInput: "" });
+        this.setState({ customPNTextInput: "" });
     };
 
     convertOnClick = () => {
+
+        if (this.state.standardLFNTextInput == "" || this.state.standardLLNTextInput == "") {
+            alert("Legal FirstName and Legal LastnName are required");
+            return;
+        }
+
         document.getElementById('modal-root').style.filter = 'blur(5px)'
         var payload = {
-            text: this.state.standardTextInput,
+            legalFirstName: this.state.standardLFNTextInput,
+            legalLastName: this.state.standardLLNTextInput,
+            preferedName: this.state.standardPNTextInput,
             language: "English",
             processType: "Standard"
         };
@@ -65,20 +117,29 @@ export class Home extends Component {
     }
 
     customProcess = (blob) => {
-        console.log(blob);
+
+        if (this.state.customLFNTextInput == "" || this.state.customLLNTextInput == "") {
+            alert("Legal FirstName and Legal LastnName are required, Please record again");
+            return;
+        }
+
+        console.log(blob);// Need to send this blob to the API
 
         var payload = {
-            text: this.state.customTextInput,
+            legalFirstName: this.state.customLFNTextInput,
+            legalLastName: this.state.customLLNTextInput,
+            preferedName: this.state.customPNTextInput,
             language: "English",
-            processType: "NonStandard",
-            audioFile : blob
+            processType: "NonStandard"//,
+            //audioFile: blob
         };
 
-       
+        var blob = new Blob([arrayBuffer], { type: type });
+        var url = URL.createObjectURL(blob);
 
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'content-type': 'application/json' },
             body: JSON.stringify(payload)
         };
 
@@ -93,16 +154,24 @@ export class Home extends Component {
 
         //let data = new FormData();
 
-        //data.append('text', this.state.customTextInput);
+        //data.append('legalFirstName', this.state.customLFNTextInput);
+        //data.append('legalLastName', this.state.customLLNTextInput);
+        //data.append('preferedName', this.state.customPNTextInput);
         //data.append('language', "English");
-        //data.append('processType', "Custom");
-        //data.append('audioFile', blob, "audioFile.wav");
+        //data.append('processType', "NonStandard");
+        //data.append('audioFile', blob);
 
         //const config = {
-        //    headers: { 'content-type': 'multipart/form-data' }
+        //    headers: { 'content-type': 'application/json' }
         //}
-        //axios.post('/api/TextToSpeech/CustomProcess', data, config);
 
+        //axios.post('/api/TextToSpeech/CustomProcess', data, config)
+        //    .then(response => {
+        //        console.log(response);
+        //    })
+        //    .catch(error => {
+        //        console.log(error);
+        //    });
 
     }
 
@@ -113,16 +182,20 @@ export class Home extends Component {
             padding: "3px",
         };
 
+        const myBoxstyle = {
+            padding: "50px"
+        };
+
         return (
-            <div id="modal-root" className="container">
+            <div id="modal-root">
                 {/*Standard or Custom Type Selection*/}
                 <div className="row">
-                    <div className="col-sm-5">
+                    <div className="col-sm-5" style={myDivstyle}>
                         <p>
                             <b>Select the option based on your prefered approach</b>
                         </p>
                     </div>
-                    <div className="col-sm-7">
+                    <div className="col-sm-7" style={myDivstyle}>
                         <div className="form-check-inline">
                             <label className="form-check-label" for="standardradio">
                                 <input type="radio" className="form-check-input" id="standardradio" name="optradio" value="Standard" checked={status === 1} onClick={(e) => this.radioHandler(1)} /><b>Standard</b>
@@ -136,38 +209,73 @@ export class Home extends Component {
                     </div>
                 </div>
                 <br />
-
                 {/*Standard Section*/}
                 {status === 1 &&
-                    <div id="standardDiv">
-
+                    <div id="standardDiv" className="card shadow-lg bg-white rounded" style={myBoxstyle}>
                         {/* Input Text*/}
                         <div className="row">
-                            <div className="col-sm-1" style={myDivstyle}>
-                                <b>Text</b>
-                            </div>
                             <div className="col-sm-3" style={myDivstyle}>
-                                <textarea type="text" className="form-control" value={this.state.standardTextInput} onChange={this.handleStandardChange} id="standardTextInput" />
+                                <b>Legal FirstName</b>
                             </div>
+                            <div className="col-sm-9" style={myDivstyle}>
+                                <input type="text" autoComplete="off" className="form-control" value={this.state.standardLFNTextInput} onChange={this.handleStandardLFNChange} id="standardLFNTextInput" />
+                            </div>
+                        </div>
+                        <div className="row">
                             <div className="col-sm-3" style={myDivstyle}>
+                                <b>Legal LastName</b>
+                            </div>
+                            <div className="col-sm-9" style={myDivstyle}>
+                                <input type="text" autoComplete="off" className="form-control" value={this.state.standardLLNTextInput} onChange={this.handleStandardLLNChange} id="standardLLNTextInput" />
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-3" style={myDivstyle}>
+                                <b>Prefered Name</b>
+                            </div>
+                            <div className="col-sm-9" style={myDivstyle}>
+                                <input type="text" autoComplete="off" className="form-control" value={this.state.standardPNTextInput} onChange={this.handleStandardPNChange} id="standardPNTextInput" />
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-3" style={myDivstyle}>
+                                <b>Language</b>
+                            </div>
+                            <div className="col-sm-9" style={myDivstyle}>
                                 <input type="text" className="form-control" id="standardLanguageInput" disabled value="English" />
                             </div>
+                        </div>
+                        <div className="row">
                             <div className="col-sm-3" style={myDivstyle}>
-                                <button className="btn btn-dark" id="standardPlay" onClick={this.convertOnClick}>Convert</button>
+
                             </div>
-                            <div className="col-sm-2" style={myDivstyle}>
+                            <div className="col-sm-9" style={myDivstyle}>
+                                <button className="btn btn-dark" id="standardPlay" onClick={this.convertOnClick}><i className="fas fa-external-link-alt"> Convert</i></button>
+                            </div>
+
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-3" style={myDivstyle}>
+
+                            </div>
+                            <div className="col-sm-9" style={myDivstyle}>
                                 <Player
                                     url={this.state.value}
                                 />
                             </div>
                         </div>
-                        <br />
-
                         {/* Output Link*/}
                         <div className="row">
-                            <div className="col-sm-1" style={myDivstyle}><b>Link</b></div>
+                            <div className="col-sm-3" style={myDivstyle}><b>Phonetics</b></div>
                             <div className="col-sm-9" style={myDivstyle}>
-                                <input type="text" className="form-control" id="standardDataOutput" value={this.state.value}
+                                <input type="text" className="form-control" value={this.state.phoneticValue} disabled />
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-3" style={myDivstyle}><b>Audio Link</b></div>
+
+                            <div className="col-sm-7" style={myDivstyle}>
+                                <textarea type="text" className="form-control" id="standardDataOutput" value={this.state.value}
                                     onChange={({ target: { value } }) => this.setState({ value, copied: false })} disabled />
                             </div>
                             <div className="col-sm-2" style={myDivstyle}>
@@ -179,24 +287,51 @@ export class Home extends Component {
                                 {this.state.copied ? <span style={{ color: 'red' }}> Copied.</span> : null}
                             </div>
                         </div>
-
                     </div>
                 }
 
                 {/*Custom Section*/}
                 {status === 2 &&
-                    <div id="customDiv">
+                    <div id="customDiv" className="card shadow-lg bg-white rounded" style={myBoxstyle}>
                         <div className="row">
-                            <div className="col-sm-1" style={myDivstyle}>
-                                <b>Text</b>
-                            </div>
                             <div className="col-sm-3" style={myDivstyle}>
-                            <textarea type="text" className="form-control" value={this.state.customTextInput} onChange={this.handleCustomChange} id="customTextInput" />
+                                <b>Legal FirstName</b>
                             </div>
+                            <div className="col-sm-9" style={myDivstyle}>
+                                <input type="text" autoComplete="off" className="form-control" value={this.state.customLFNTextInput} onChange={this.handleCustomLFNChange} id="customLFNTextInput" />
+                            </div>
+                        </div>
+                        <div className="row">
                             <div className="col-sm-3" style={myDivstyle}>
+                                <b>Legal LastName</b>
+                            </div>
+                            <div className="col-sm-9" style={myDivstyle}>
+                                <input type="text" autoComplete="off" className="form-control" value={this.state.customLLNTextInput} onChange={this.handleCustomLLNChange} id="customLLNTextInput" />
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-3" style={myDivstyle}>
+                                <b>Prefered Name</b>
+                            </div>
+                            <div className="col-sm-9" style={myDivstyle}>
+                                <input type="text" autoComplete="off" className="form-control" value={this.state.customPNTextInput} onChange={this.handleCustomPNChange} id="customPNTextInput" />
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-3" style={myDivstyle}>
+                                <b>Language</b>
+                            </div>
+                            <div className="col-sm-9" style={myDivstyle}>
                                 <input type="text" className="form-control" id="customLanguageInput" disabled value="English" />
                             </div>
-                            <div className="col-sm-5" style={myDivstyle}>
+                        </div>
+
+
+                        <div className="row">
+                            <div className="col-sm-3" style={myDivstyle}>
+
+                            </div>
+                            <div className="col-sm-9" style={myDivstyle}>
                                 <Recorder
                                     containerClassName="my-recorder-container"
                                     Stop={<div>Stop</div>}
@@ -210,10 +345,15 @@ export class Home extends Component {
                                 />
                             </div>
                         </div>
-
                         <div className="row">
-                            <div className="col-sm-1" style={myDivstyle}><b>Output</b></div>
+                            <div className="col-sm-3" style={myDivstyle}><b>Phonetics</b></div>
                             <div className="col-sm-9" style={myDivstyle}>
+                                <input type="text" className="form-control" value={this.state.phoneticValue} disabled />
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-3" style={myDivstyle}><b>Audio Link</b></div>
+                            <div className="col-sm-7" style={myDivstyle}>
                                 <textarea type="text" className="form-control" id="customDataOutput" value={this.state.value}
                                     onChange={({ target: { value } }) => this.setState({ value, copied: false })} disabled />
                             </div>

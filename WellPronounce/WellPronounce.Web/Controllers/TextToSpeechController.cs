@@ -56,7 +56,8 @@ namespace WellPronounce.Web.Controllers
         {
             try
             {
-                byte[] byteContent = customTextRequestModel.AudioFile;
+                IFormFile file = Request.Form.Files[0];
+                var byteContent = customTextRequestModel.AudioFile;
                 return Ok();
             }
             catch (Exception ex)

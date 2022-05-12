@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,19 @@ namespace WellPronounce.Web.ApiModels
 {
     public class CustomTextRequestModel
     {
-        public string Text { get; set; }
+        [JsonPropertyName("legalFirstName")]
+        public string LegalFirstName { get; set; }
+        [JsonPropertyName("legalLastName")]
+        public string LegalLastName { get; set; }
+        [JsonPropertyName("preferedName")]
+        public string PreferedName { get; set; }
+        [JsonPropertyName("language")]
         public string Language { get; set; }
         [JsonPropertyName("processType")]
         public string ProcessType { get; set; }
+
         [JsonPropertyName("audioFile")]
-        public byte[] AudioFile { get; set; }
+        public FilterContext AudioFile { get; set; }
 
     }
 }

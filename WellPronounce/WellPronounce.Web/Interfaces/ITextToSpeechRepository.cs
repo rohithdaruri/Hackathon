@@ -10,7 +10,7 @@ namespace WellPronounce.Web.Interfaces
     public interface ITextToSpeechRepository
     {
         Task<StandardOutputModel> GetDetailByName(StandardTextRequestModel standardTextRequestModel);
-        Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(string blobPath, StandardTextRequestModel standardTextRequestModel);
+        Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(string blobPath, StandardTextRequestModel standardTextRequestModel, string phonetics);
         Task<List<SpeechDetail>> GetRecords();
     }
 }

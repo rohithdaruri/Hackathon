@@ -13,7 +13,10 @@ namespace WellPronounce.Web.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }      
         public Guid UniqueId { get; set; }
-        public string InputText { get; set; }
+        public string LegalFirstName { get; set; }
+        public string LegalLastName { get; set; }
+        public string PreferedName { get; set; }
+        public string Phonetics { get; set; }
         public string Language { get; set; }
         public string ProcessType { get; set; }
         public string BlobPath { get; set; }

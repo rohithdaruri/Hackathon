@@ -31,7 +31,7 @@ namespace WellPronounce.Web.Services
 
             using (var speechSynthesizer = new SpeechSynthesizer(speechConfig))
             {
-                string text = standardTextRequestModel.Text;
+                string text = standardTextRequestModel.PreferedName == "" ? standardTextRequestModel.LegalFirstName + " " + standardTextRequestModel.LegalLastName : standardTextRequestModel.PreferedName;
                 var speechSynthesisResult = await speechSynthesizer.SpeakTextAsync(text);
                 blob = OutputSpeechSynthesisResult(speechSynthesisResult, standardTextRequestModel);
             }
@@ -62,7 +62,7 @@ namespace WellPronounce.Web.Services
         {
             try
             {
-                if (standardTextRequestModel.Text != "")
+                if (standardTextRequestModel.LegalFirstName != "" && standardTextRequestModel.LegalLastName != "")
                 {
                     var blobPath = string.Empty;
                     StandardOutputModel response;
@@ -70,8 +70,9 @@ namespace WellPronounce.Web.Services
                     var existing = await _textToSpeechRepository.GetDetailByName(standardTextRequestModel);
                     if (existing == null)
                     {
-                        blobPath = await _blobStorageService.UploadFileToBlob(standardTextRequestModel.Text, blob, "");
-                        response = await _textToSpeechRepository.StandardProcessSaveTextToSpeechData(blobPath, standardTextRequestModel);
+                        var text = standardTextRequestModel.PreferedName == "" ? standardTextRequestModel.LegalFirstName + " " + standardTextRequestModel.LegalLastName : standardTextRequestModel.PreferedName;
+                        blobPath = await _blobStorageService.UploadFileToBlob(text, blob, "");
+                        response = await _textToSpeechRepository.StandardProcessSaveTextToSpeechData(blobPath, standardTextRequestModel,phonetics:"");
                         return response;
                     }
                     else

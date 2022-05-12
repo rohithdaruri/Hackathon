@@ -57,6 +57,7 @@ export class Home extends Component {
                 this.setState({
                     value: res.path
                 });
+                //console.log(this.state.value);
                 document.getElementById('modal-root').style.filter = 'blur(0px)'
             }
         });
@@ -152,12 +153,12 @@ export class Home extends Component {
                                 <input type="text" className="form-control" id="standardLanguageInput" disabled value="English" />
                             </div>
                             <div className="col-sm-3" style={myDivstyle}>
-                                <button className="btn btn-dark" id="standardPlay" onClick={this.convertOnClick}>Play</button>
+                                <button className="btn btn-dark" id="standardPlay" onClick={this.convertOnClick}>Convert</button>
                             </div>
                             <div className="col-sm-2" style={myDivstyle}>
-                                {/*<Player*/}
-                                {/*    url={this.state.value}*/}
-                                {/*/>*/}
+                                <Player
+                                    url={this.state.value}
+                                />
                             </div>
                         </div>
                         <br />

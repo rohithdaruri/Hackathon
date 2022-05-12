@@ -50,7 +50,7 @@ namespace WellPronounce.Web.Services
                 CloudBlobClient cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
                 string strContainerName = "texttospeechconversions";
                 CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(strContainerName);
-                string fileName = this.GenerateFileName(strFileName) + ".wav";
+                string fileName = this.GenerateFileName(strFileName) + ".mp3";
 
                 if (await cloudBlobContainer.CreateIfNotExistsAsync())
                 {
@@ -60,7 +60,7 @@ namespace WellPronounce.Web.Services
                 if (fileName != null && fileData != null)
                 {
                     CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(fileName);
-                    cloudBlockBlob.Properties.ContentType = "audio/x-wav";
+                    cloudBlockBlob.Properties.ContentType = "audio/mpeg";
                     await cloudBlockBlob.UploadFromByteArrayAsync(fileData, 0, fileData.Length);
                     return cloudBlockBlob.Uri.AbsoluteUri;
                 }

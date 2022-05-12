@@ -116,14 +116,17 @@ export class Home extends Component {
 
     }
 
-    customProcess = (blob) => {
+    customProcess = (blobUrl, blob) => {
 
         if (this.state.customLFNTextInput == "" || this.state.customLLNTextInput == "") {
             alert("Legal FirstName and Legal LastnName are required, Please record again");
             return;
         }
 
+        console.log(blobUrl);
+
         console.log(blob);// Need to send this blob to the API
+       
 
         var payload = {
             legalFirstName: this.state.customLFNTextInput,
@@ -338,7 +341,7 @@ export class Home extends Component {
                                     Record={<div>Record</div>}
                                     Send={<div>Upload</div>}
                                     onSend={(blobUrl, blob) => {
-                                        this.customProcess(blob);
+                                        this.customProcess(blobUrl,blob);
                                     }}
                                 />
                             </div>

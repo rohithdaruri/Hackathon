@@ -11,7 +11,7 @@ using WellPronounce.Web.ApiModels;
 using WellPronounce.Web.Entities;
 using WellPronounce.Web.Interfaces;
 using System.Speech.Synthesis;
-
+using Microsoft.Extensions.Logging;
 
 namespace WellPronounce.Web.Services
 {
@@ -19,49 +19,67 @@ namespace WellPronounce.Web.Services
     {
         private readonly IBlobStorageService _blobStorageService;
         private readonly ITextToSpeechRepository _textToSpeechRepository;
+        private readonly ILogger<TextToSpeechService> _logger;
         private static string YourSubscriptionKey = "1b3f59b543794337a9d5631a28af911a";
         private static string YourServiceRegion = "centralindia"; //centralindia  //Central India
 
-        public TextToSpeechService(IBlobStorageService blobStorageService, ITextToSpeechRepository textToSpeechRepository)
+        public TextToSpeechService(IBlobStorageService blobStorageService, ITextToSpeechRepository textToSpeechRepository, ILogger<TextToSpeechService> logger)
         {
             _blobStorageService = blobStorageService;
             _textToSpeechRepository = textToSpeechRepository;
+            _logger = logger;
         }
 
         private async Task<byte[]> CallCognitiveService(StandardTextRequestModel standardTextRequestModel)
         {
-            var speechConfig = SpeechConfig.FromSubscription(YourSubscriptionKey, YourServiceRegion);
-            // The language of the voice that speaks.
-            byte[] blob;
-            speechConfig.SpeechSynthesisVoiceName = "en-IN-NeerjaNeural"; //en-IN-NeerjaNeural //en-US-JennyNeural
-
-            using (var speechSynthesizer = new Microsoft.CognitiveServices.Speech.SpeechSynthesizer(speechConfig))
+            try
             {
-                string text = standardTextRequestModel.PreferedName == "" ? standardTextRequestModel.LegalFirstName + " " + standardTextRequestModel.LegalLastName : standardTextRequestModel.PreferedName;
-                var speechSynthesisResult = await speechSynthesizer.SpeakTextAsync(text);
-                blob = OutputSpeechSynthesisResult(speechSynthesisResult, standardTextRequestModel);
-            }
+                var speechConfig = SpeechConfig.FromSubscription(YourSubscriptionKey, YourServiceRegion);
+                // The language of the voice that speaks.
+                byte[] blob;
+                speechConfig.SpeechSynthesisVoiceName = "en-IN-NeerjaNeural"; //en-IN-NeerjaNeural //en-US-JennyNeural
 
-            return blob;
+                using (var speechSynthesizer = new Microsoft.CognitiveServices.Speech.SpeechSynthesizer(speechConfig))
+                {
+                    string text = standardTextRequestModel.PreferedName == "" ? standardTextRequestModel.LegalFirstName + " " + standardTextRequestModel.LegalLastName : standardTextRequestModel.PreferedName;
+                    var speechSynthesisResult = await speechSynthesizer.SpeakTextAsync(text);
+                    blob = OutputSpeechSynthesisResult(speechSynthesisResult, standardTextRequestModel);
+                }
+
+                return blob;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }           
         }
 
         private byte[] OutputSpeechSynthesisResult(SpeechSynthesisResult speechSynthesisResult, StandardTextRequestModel standardTextRequestModel)
         {
-            switch (speechSynthesisResult.Reason)
+            try
             {
-                case ResultReason.SynthesizingAudioCompleted:
-                    var audiofile = speechSynthesisResult.AudioData;
-                    return audiofile;
-                case ResultReason.Canceled:
-                    var cancellation = SpeechSynthesisCancellationDetails.FromResult(speechSynthesisResult);
-                    if (cancellation.Reason == CancellationReason.Error)
-                    {
-                        // Log Error
-                    }
-                    return null;
-                default:
-                    return null;
+                switch (speechSynthesisResult.Reason)
+                {
+                    case ResultReason.SynthesizingAudioCompleted:
+                        var audiofile = speechSynthesisResult.AudioData;
+                        return audiofile;
+                    case ResultReason.Canceled:
+                        var cancellation = SpeechSynthesisCancellationDetails.FromResult(speechSynthesisResult);
+                        if (cancellation.Reason == CancellationReason.Error)
+                        {
+                            // Log Error
+                        }
+                        return null;
+                    default:
+                        return null;
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }           
         }
 
         public async Task<StandardOutputModel> StandardProcessSaveTextToSpeechData(StandardTextRequestModel standardTextRequestModel)
@@ -94,6 +112,7 @@ namespace WellPronounce.Web.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.ToString());
                 throw;
             }
             
@@ -108,109 +127,152 @@ namespace WellPronounce.Web.Services
 
         public static string recoPhonemes;
 
-        private static string CreatePhonetics(StandardTextRequestModel standardTextRequestModel)
+        private string CreatePhonetics(StandardTextRequestModel standardTextRequestModel)
         {
-            string text = standardTextRequestModel.PreferedName == "" ? standardTextRequestModel.LegalFirstName + " " + standardTextRequestModel.LegalLastName : standardTextRequestModel.PreferedName;
-            string MyPronunciation = GetPronunciationFromText(text.Trim()); // Get IPA pronunciations of MyTe
-            return MyPronunciation;
+            try
+            {
+                string text = standardTextRequestModel.PreferedName == "" ? standardTextRequestModel.LegalFirstName + " " + standardTextRequestModel.LegalLastName : standardTextRequestModel.PreferedName;
+                string MyPronunciation = GetPronunciationFromText(text.Trim()); // Get IPA pronunciations of MyTe
+                return MyPronunciation;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+           
         }
 
-        private static string GetPronunciationFromText(string MyWord)
+        private  string GetPronunciationFromText(string MyWord)
         {
             //this is a trick to figure out phonemes used by synthesis engine
 
             //txt to wav
-            using (MemoryStream audioStream = new MemoryStream())
+            try
             {
-                using (System.Speech.Synthesis.SpeechSynthesizer synth = new System.Speech.Synthesis.SpeechSynthesizer())
+                using (MemoryStream audioStream = new MemoryStream())
                 {
-                    synth.SetOutputToWaveStream(audioStream);
-                    PromptBuilder pb = new PromptBuilder();
-                    //pb.AppendBreak(PromptBreak.ExtraSmall); //'e' wont be recognized if this is large, or non-existent?
-                    //synth.Speak(pb);
-                    synth.Speak(MyWord);
-                    //synth.Speak(pb);
-                    synth.SetOutputToNull();
-                    audioStream.Position = 0;
-
-                    //now wav to txt (for reco phonemes)
-                    recoPhonemes = String.Empty;
-                    GrammarBuilder gb = new GrammarBuilder(MyWord);
-                    System.Speech.Recognition.Grammar g = new System.Speech.Recognition.Grammar(gb); //TODO the hard letters to recognize are 'g' and 'e'
-                    SpeechRecognitionEngine reco = new SpeechRecognitionEngine();
-                    reco.SpeechHypothesized += new EventHandler<SpeechHypothesizedEventArgs>(reco_SpeechHypothesized);
-                    reco.SpeechRecognitionRejected += new EventHandler<SpeechRecognitionRejectedEventArgs>(reco_SpeechRecognitionRejected);
-                    reco.UnloadAllGrammars(); //only use the one word grammar
-                    reco.LoadGrammar(g);
-                    reco.SetInputToWaveStream(audioStream);
-                    System.Speech.Recognition.RecognitionResult rr = reco.Recognize();
-                    reco.SetInputToNull();
-                    if (rr != null)
+                    using (System.Speech.Synthesis.SpeechSynthesizer synth = new System.Speech.Synthesis.SpeechSynthesizer())
                     {
-                        recoPhonemes = StringFromWordArray(rr.Words, WordType.Pronunciation);
+                        synth.SetOutputToWaveStream(audioStream);
+                        PromptBuilder pb = new PromptBuilder();
+                        //pb.AppendBreak(PromptBreak.ExtraSmall); //'e' wont be recognized if this is large, or non-existent?
+                        //synth.Speak(pb);
+                        synth.Speak(MyWord);
+                        //synth.Speak(pb);
+                        synth.SetOutputToNull();
+                        audioStream.Position = 0;
+
+                        //now wav to txt (for reco phonemes)
+                        recoPhonemes = String.Empty;
+                        GrammarBuilder gb = new GrammarBuilder(MyWord);
+                        System.Speech.Recognition.Grammar g = new System.Speech.Recognition.Grammar(gb); //TODO the hard letters to recognize are 'g' and 'e'
+                        SpeechRecognitionEngine reco = new SpeechRecognitionEngine();
+                        reco.SpeechHypothesized += new EventHandler<SpeechHypothesizedEventArgs>(reco_SpeechHypothesized);
+                        reco.SpeechRecognitionRejected += new EventHandler<SpeechRecognitionRejectedEventArgs>(reco_SpeechRecognitionRejected);
+                        reco.UnloadAllGrammars(); //only use the one word grammar
+                        reco.LoadGrammar(g);
+                        reco.SetInputToWaveStream(audioStream);
+                        System.Speech.Recognition.RecognitionResult rr = reco.Recognize();
+                        reco.SetInputToNull();
+                        if (rr != null)
+                        {
+                            recoPhonemes = StringFromWordArray(rr.Words, WordType.Pronunciation);
+                        }
+                        //txtRecoPho.Text = recoPhonemes;
+                        return recoPhonemes;
                     }
-                    //txtRecoPho.Text = recoPhonemes;
-                    return recoPhonemes;
                 }
             }
-        }
-
-        private static string StringFromWordArray(ReadOnlyCollection<RecognizedWordUnit> words, WordType type)
-        {
-            string text = "";
-            foreach (RecognizedWordUnit word in words)
+            catch (Exception ex)
             {
-                string wordText = "";
-                if (type == WordType.Text || type == WordType.Normalized)
-                {
-                    wordText = word.Text;
-                }
-                else if (type == WordType.Lexical)
-                {
-                    wordText = word.LexicalForm;
-                }
-                else if (type == WordType.Pronunciation)
-                {
-                    wordText = word.Pronunciation;
-                    //MessageBox.Show(word.LexicalForm);
-                }
-                else
-                {
-                    throw new InvalidEnumArgumentException(String.Format("[0}: is not a valid input", type));
-                }
-                //Use display attribute
-
-                if ((word.DisplayAttributes & DisplayAttributes.OneTrailingSpace) != 0)
-                {
-                    wordText += " ";
-                }
-                if ((word.DisplayAttributes & DisplayAttributes.TwoTrailingSpaces) != 0)
-                {
-                    wordText += "  ";
-                }
-                if ((word.DisplayAttributes & DisplayAttributes.ConsumeLeadingSpaces) != 0)
-                {
-                    wordText = wordText.TrimStart();
-                }
-                if ((word.DisplayAttributes & DisplayAttributes.ZeroTrailingSpaces) != 0)
-                {
-                    wordText = wordText.TrimEnd();
-                }
-
-                text += wordText;
-
+                _logger.LogError(ex.ToString());
+                throw;
             }
-            return text;
+            
         }
 
-        private static void reco_SpeechHypothesized(object sender, SpeechHypothesizedEventArgs e)
+        private string StringFromWordArray(ReadOnlyCollection<RecognizedWordUnit> words, WordType type)
         {
-            recoPhonemes = StringFromWordArray(e.Result.Words, WordType.Pronunciation);
+            try
+            {
+                string text = "";
+                foreach (RecognizedWordUnit word in words)
+                {
+                    string wordText = "";
+                    if (type == WordType.Text || type == WordType.Normalized)
+                    {
+                        wordText = word.Text;
+                    }
+                    else if (type == WordType.Lexical)
+                    {
+                        wordText = word.LexicalForm;
+                    }
+                    else if (type == WordType.Pronunciation)
+                    {
+                        wordText = word.Pronunciation;
+                        //MessageBox.Show(word.LexicalForm);
+                    }
+                    else
+                    {
+                        throw new InvalidEnumArgumentException(String.Format("[0}: is not a valid input", type));
+                    }
+                    //Use display attribute
+
+                    if ((word.DisplayAttributes & DisplayAttributes.OneTrailingSpace) != 0)
+                    {
+                        wordText += " ";
+                    }
+                    if ((word.DisplayAttributes & DisplayAttributes.TwoTrailingSpaces) != 0)
+                    {
+                        wordText += "  ";
+                    }
+                    if ((word.DisplayAttributes & DisplayAttributes.ConsumeLeadingSpaces) != 0)
+                    {
+                        wordText = wordText.TrimStart();
+                    }
+                    if ((word.DisplayAttributes & DisplayAttributes.ZeroTrailingSpaces) != 0)
+                    {
+                        wordText = wordText.TrimEnd();
+                    }
+
+                    text += wordText;
+
+                }
+                return text;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+            
         }
 
-        private static void reco_SpeechRecognitionRejected(object sender, SpeechRecognitionRejectedEventArgs e)
+        private void reco_SpeechHypothesized(object sender, SpeechHypothesizedEventArgs e)
         {
-            recoPhonemes = StringFromWordArray(e.Result.Words, WordType.Pronunciation);
+            try
+            {
+                recoPhonemes = StringFromWordArray(e.Result.Words, WordType.Pronunciation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }         
+        }
+
+        private void reco_SpeechRecognitionRejected(object sender, SpeechRecognitionRejectedEventArgs e)
+        {
+            try
+            {
+                recoPhonemes = StringFromWordArray(e.Result.Words, WordType.Pronunciation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }         
         }
 
 

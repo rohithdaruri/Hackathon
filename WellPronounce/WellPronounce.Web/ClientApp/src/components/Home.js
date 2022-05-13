@@ -107,9 +107,9 @@ export class Home extends Component {
         const response = fetch('/api/TextToSpeech/StandardProcess', requestOptions).then(r => r.json()).then(res => {
             if (res) {
                 this.setState({
-                    value: res.path
+                    value: res.path,
+                    phoneticValue : res.phonetics
                 });
-                //console.log(this.state.value);
                 document.getElementById('modal-root').style.filter = 'blur(0px)'
             }
         });
@@ -133,8 +133,7 @@ export class Home extends Component {
             legalLastName: this.state.customLLNTextInput,
             preferedName: this.state.customPNTextInput,
             language: "English",
-            processType: "NonStandard"//,
-            //audioFile: blob
+            processType: "NonStandard"
         };
 
         

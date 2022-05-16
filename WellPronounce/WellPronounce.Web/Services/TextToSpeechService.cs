@@ -88,16 +88,17 @@ namespace WellPronounce.Web.Services
             {
                 if (standardTextRequestModel.LegalFirstName != "" && standardTextRequestModel.LegalLastName != "")
                 {
-                    var blobPath = string.Empty;
+                    var blobPath = new AzureBlobPathModel();
                     StandardOutputModel response;
                     var blob = await CallCognitiveService(standardTextRequestModel);
+                    //var phonetics = CreatePhonetics(standardTextRequestModel);
                     var phonetics = CreatePhonetics(standardTextRequestModel);
                     var existing = await _textToSpeechRepository.GetDetailByName(standardTextRequestModel);
                     if (existing == null)
                     {
                         var text = standardTextRequestModel.PreferedName == "" ? standardTextRequestModel.LegalFirstName + " " + standardTextRequestModel.LegalLastName : standardTextRequestModel.PreferedName;
                         blobPath = await _blobStorageService.UploadFileToBlob(text, blob, "");
-                        response = await _textToSpeechRepository.StandardProcessSaveTextToSpeechData(blobPath, standardTextRequestModel, phonetics);
+                        response = await _textToSpeechRepository.StandardProcessSaveTextToSpeechData(blobPath.BlobPath, standardTextRequestModel, phonetics);
                         return response;
                     }
                     else

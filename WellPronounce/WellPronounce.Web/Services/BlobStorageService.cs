@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using WellPronounce.Web.ApiModels;
 using WellPronounce.Web.AppConfig;
 using WellPronounce.Web.Interfaces;
 
@@ -20,12 +21,12 @@ namespace WellPronounce.Web.Services
             accessKey = configuration.GetConnectionString("AccessKey");
         }
 
-        public async Task<string> UploadFileToBlob(string strFileName, byte[] fileData, string fileMimeType)
+        public async Task<AzureBlobPathModel> UploadFileToBlob(string strFileName, byte[] fileData, string fileMimeType)
         {
             try
             {
 
-                string fileUrl = await UploadFileToBlobAsync(strFileName, fileData, fileMimeType);
+                AzureBlobPathModel fileUrl = await UploadFileToBlobAsync(strFileName, fileData, fileMimeType);
                 return fileUrl;
             }
             catch (Exception)
@@ -42,15 +43,16 @@ namespace WellPronounce.Web.Services
             return strFileName;
         }
 
-        private async Task<string> UploadFileToBlobAsync(string strFileName, byte[] fileData, string fileMimeType)
+        private async Task<AzureBlobPathModel> UploadFileToBlobAsync(string strFileName, byte[] fileData, string fileMimeType)
         {
+            var azureBlobPathModel = new AzureBlobPathModel();
             try
             {
                 CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(accessKey);
                 CloudBlobClient cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
                 string strContainerName = "texttospeechconversions";
                 CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(strContainerName);
-                string fileName = this.GenerateFileName(strFileName) + ".mp3";
+                string fileName = strFileName + ".wav";
 
                 if (await cloudBlobContainer.CreateIfNotExistsAsync())
                 {
@@ -60,11 +62,24 @@ namespace WellPronounce.Web.Services
                 if (fileName != null && fileData != null)
                 {
                     CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(fileName);
-                    cloudBlockBlob.Properties.ContentType = "audio/mpeg";
+                    cloudBlockBlob.Properties.ContentType = "audio/wav";
                     await cloudBlockBlob.UploadFromByteArrayAsync(fileData, 0, fileData.Length);
-                    return cloudBlockBlob.Uri.AbsoluteUri;
+
+                    var appPath = Directory.GetCurrentDirectory();
+
+                    // provide the file download location below
+                    string downloadedFile = @$"{appPath}\BlobFile\{fileName}";
+                    
+                    using (var file = File.OpenWrite(downloadedFile))
+                    {
+                        await cloudBlockBlob.DownloadToStreamAsync(file);
+                        azureBlobPathModel.DownloadPath = downloadedFile;
+                    }
+
+                    azureBlobPathModel.BlobPath = cloudBlockBlob.Uri.AbsoluteUri;
+                    return azureBlobPathModel;
                 }
-                return "";
+                return azureBlobPathModel;
             }
             catch (Exception ex)
             {

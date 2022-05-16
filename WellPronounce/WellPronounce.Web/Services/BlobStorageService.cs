@@ -65,16 +65,16 @@ namespace WellPronounce.Web.Services
                     cloudBlockBlob.Properties.ContentType = "audio/wav";
                     await cloudBlockBlob.UploadFromByteArrayAsync(fileData, 0, fileData.Length);
 
-                    var appPath = Directory.GetCurrentDirectory();
+                    //var appPath = Directory.GetCurrentDirectory();
 
-                    // provide the file download location below
-                    string downloadedFile = @$"{appPath}\BlobFile\{fileName}";
+                    //// provide the file download location below
+                    //string downloadedFile = @$"{appPath}\BlobFile\{fileName}";
                     
-                    using (var file = File.OpenWrite(downloadedFile))
-                    {
-                        await cloudBlockBlob.DownloadToStreamAsync(file);
-                        azureBlobPathModel.DownloadPath = downloadedFile;
-                    }
+                    //using (var file = File.OpenWrite(downloadedFile))
+                    //{
+                    //    await cloudBlockBlob.DownloadToStreamAsync(file);
+                    //    azureBlobPathModel.DownloadPath = downloadedFile;
+                    //}
 
                     azureBlobPathModel.BlobPath = cloudBlockBlob.Uri.AbsoluteUri;
                     return azureBlobPathModel;
